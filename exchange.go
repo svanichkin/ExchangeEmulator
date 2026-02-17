@@ -481,6 +481,11 @@ func (e *Exchange) processPending(bar OHLCBar) *Order {
 			}
 			order := e.closeAtPrice(fillPrice, p.reason, p.stopKind)
 			order.PlacedTick = p.placedAtTick
+			// closeAtPrice already appends order into e.orders with PlacedTick=e.tick;
+			// keep emitted order and stored history consistent with original pending placement tick.
+			if n := len(e.orders); n > 0 {
+				e.orders[n-1].PlacedTick = p.placedAtTick
+			}
 			executed = &order
 		}
 		e.pending = e.pending[1:]
