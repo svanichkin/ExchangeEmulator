@@ -15,13 +15,17 @@ func inRange(price float64, low float64, high float64) bool {
 }
 
 func TestIntegrationNextLogsTenBars(t *testing.T) {
+	bars, err := emul.LoadBarsFromCSV(integrationCSVPath)
+	if err != nil {
+		t.Fatalf("load csv: %v", err)
+	}
+
 	emu, err := emul.NewEmulatorFromConfig(emul.EmulatorConfig{
-		Symbol:      "enj",
 		StartUSD:    1000,
 		Fee:         0.001,
 		SlippagePct: 0,
 		SpreadPct:   0,
-		CSVPath:     integrationCSVPath,
+		Bars:        bars,
 	})
 	if err != nil {
 		t.Fatalf("new emulator: %v", err)
@@ -40,13 +44,17 @@ func TestIntegrationNextLogsTenBars(t *testing.T) {
 }
 
 func TestIntegrationLimitAndOppositeOrder(t *testing.T) {
+	bars, err := emul.LoadBarsFromCSV(integrationCSVPath)
+	if err != nil {
+		t.Fatalf("load csv: %v", err)
+	}
+
 	emu, err := emul.NewEmulatorFromConfig(emul.EmulatorConfig{
-		Symbol:      "enj",
 		StartUSD:    1000,
 		Fee:         0.001,
 		SlippagePct: 0,
 		SpreadPct:   0,
-		CSVPath:     integrationCSVPath,
+		Bars:        bars,
 	})
 	if err != nil {
 		t.Fatalf("new emulator: %v", err)

@@ -11,53 +11,45 @@ var ErrNoMoreBars = errors.New("no more bars")
 
 // Emulator replays historical bars one-by-one and applies them to Exchange.
 type Emulator struct {
-	symbol string
-	bars   []OHLCBar
-	index  int
-	ex     *Exchange
+	bars  []OHLCBar
+	index int
+	ex    *Exchange
 }
 
 type EmulatorConfig struct {
-	Symbol      string
 	StartUSD    float64
 	Fee         float64
 	SlippagePct float64
 	SpreadPct   float64
-	CSVPath     string
+	Bars        []OHLCBar
 }
 
-func NewEmulator(symbol string, startUSD float64, fee float64, slippagePct float64, spreadPct float64, bars []OHLCBar) (*Emulator, error) {
-	symbol = strings.TrimSpace(symbol)
-	if symbol == "" {
-		return nil, fmt.Errorf("symbol is empty")
-	}
+func NewEmulator(startUSD float64, fee float64, slippagePct float64, spreadPct float64, bars []OHLCBar) (*Emulator, error) {
 	if len(bars) == 0 {
 		return nil, fmt.Errorf("bars are empty")
 	}
 	return &Emulator{
-		symbol: symbol,
-		bars:   bars,
-		ex:     NewExchange(symbol, startUSD, fee, slippagePct, spreadPct),
+		bars: bars,
+		ex:   NewExchange(startUSD, fee, slippagePct, spreadPct),
 	}, nil
 }
 
-func NewEmulatorFromCSV(symbol string, startUSD float64, fee float64, slippagePct float64, spreadPct float64, csvPath string) (*Emulator, error) {
+func NewEmulatorFromCSV(startUSD float64, fee float64, slippagePct float64, spreadPct float64, csvPath string) (*Emulator, error) {
 	bars, err := LoadBarsFromCSV(csvPath)
 	if err != nil {
 		return nil, err
 	}
-	return NewEmulator(symbol, startUSD, fee, slippagePct, spreadPct, bars)
+	return NewEmulator(startUSD, fee, slippagePct, spreadPct, bars)
 }
 
-// NewEmulatorFromConfig groups path and fee together to reduce call-site mistakes.
+// NewEmulatorFromConfig consumes prepared bars (no file I/O in production code paths).
 func NewEmulatorFromConfig(cfg EmulatorConfig) (*Emulator, error) {
-	return NewEmulatorFromCSV(
-		cfg.Symbol,
+	return NewEmulator(
 		cfg.StartUSD,
 		cfg.Fee,
 		cfg.SlippagePct,
 		cfg.SpreadPct,
-		cfg.CSVPath,
+		cfg.Bars,
 	)
 }
 
@@ -82,7 +74,7 @@ func (e *Emulator) Next() (OHLCBar, []Order, error) {
 	}
 	bar := e.bars[e.index]
 	before := e.ex.Orders()
-	_, err := e.ex.tickBarAt(e.symbol, int64(e.index+1), bar)
+	_, err := e.ex.tickBarAt(int64(e.index+1), bar)
 	if err != nil {
 		return OHLCBar{}, nil, err
 	}

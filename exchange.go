@@ -67,7 +67,6 @@ type WalletSnapshot struct {
 }
 
 type Exchange struct {
-	symbol       string
 	fee          float64
 	slippagePct  float64
 	spreadPct    float64
@@ -128,14 +127,13 @@ type LimitDiagnostics struct {
 }
 
 var (
-	ErrSymbolMismatch  = errors.New("symbol mismatch")
 	ErrPriceNotSet     = errors.New("price not set")
 	ErrPositionOpen    = errors.New("position already open")
 	ErrNoPosition      = errors.New("no open position")
 	ErrInvalidFraction = errors.New("fraction must be in (0, 1]")
 )
 
-func NewExchange(symbol string, startUSD float64, fee float64, slippagePct float64, spreadPct float64) *Exchange {
+func NewExchange(startUSD float64, fee float64, slippagePct float64, spreadPct float64) *Exchange {
 	if startUSD < 0 {
 		startUSD = 0
 	}
@@ -152,7 +150,6 @@ func NewExchange(symbol string, startUSD float64, fee float64, slippagePct float
 		spreadManual = true
 	}
 	return &Exchange{
-		symbol:       symbol,
 		fee:          fee,
 		usd:          startUSD,
 		slippagePct:  slippagePct,
@@ -211,10 +208,7 @@ func (e *Exchange) Wallet() WalletSnapshot {
 }
 
 // tick is internal; external callers advance bars via Emulator.Next().
-func (e *Exchange) tickBarAt(symbol string, tick int64, bar OHLCBar) (*Order, error) {
-	if symbol != e.symbol {
-		return nil, ErrSymbolMismatch
-	}
+func (e *Exchange) tickBarAt(tick int64, bar OHLCBar) (*Order, error) {
 	price := bar.Close
 	if price <= 0 {
 		return nil, fmt.Errorf("price must be positive")
@@ -678,7 +672,7 @@ func (e *Exchange) recordOrder(side OrderSide, qty float64, mid float64, exec fl
 	bal := e.Balance()
 	order := Order{
 		ID:            e.nextID,
-		Symbol:        e.symbol,
+		Symbol:        "",
 		Side:          side,
 		Qty:           qty,
 		MidPrice:      mid,
