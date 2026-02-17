@@ -71,7 +71,9 @@ type Exchange struct {
 	tick         int64
 	orders       []Order
 	nextID       int64
+	nextLimitID  int64
 	pending      []pendingOrder
+	executedByID map[int64]Order
 	limitFailed  map[string]int
 	misses       []LimitMiss
 	lastBar      OHLCBar
@@ -87,6 +89,7 @@ const (
 )
 
 type pendingOrder struct {
+	id           int64
 	kind         pendingKind
 	price        float64
 	fraction     float64
@@ -144,6 +147,7 @@ func NewExchange(symbol string, startUSD float64, fee float64, slippagePct float
 		slippagePct:  slippagePct,
 		spreadPct:    spreadPct,
 		spreadManual: spreadManual,
+		executedByID: make(map[int64]Order),
 		limitFailed:  make(map[string]int),
 	}
 }
@@ -214,16 +218,25 @@ func (e *Exchange) OpenLong(fraction float64) (*Order, error) {
 }
 
 func (e *Exchange) OpenLongLimit(price float64, fraction float64) (*Order, error) {
+	_, err := e.LongLimit(price, fraction)
+	return nil, err
+}
+
+// LongLimit places a limit order and returns its limit-order ID.
+func (e *Exchange) LongLimit(price float64, fraction float64) (int64, error) {
 	if price <= 0 {
 		price = e.lastPrice
 	}
 	if price <= 0 {
-		return nil, ErrPriceNotSet
+		return 0, ErrPriceNotSet
 	}
 	if fraction <= 0 || fraction > 1 {
-		return nil, ErrInvalidFraction
+		return 0, ErrInvalidFraction
 	}
+	e.nextLimitID++
+	id := e.nextLimitID
 	e.pending = append(e.pending, pendingOrder{
+		id:           id,
 		kind:         pendingOpenLong,
 		price:        price,
 		fraction:     fraction,
@@ -231,7 +244,7 @@ func (e *Exchange) OpenLongLimit(price float64, fraction float64) (*Order, error
 		lastReason:   "await_next_candle",
 		placedBar:    e.lastBar,
 	})
-	return nil, nil
+	return id, nil
 }
 
 func (e *Exchange) OpenShort(fraction float64) (*Order, error) {
@@ -239,16 +252,24 @@ func (e *Exchange) OpenShort(fraction float64) (*Order, error) {
 }
 
 func (e *Exchange) OpenShortLimit(price float64, fraction float64) (*Order, error) {
+	_, err := e.ShortLimit(price, fraction)
+	return nil, err
+}
+
+func (e *Exchange) ShortLimit(price float64, fraction float64) (int64, error) {
 	if price <= 0 {
 		price = e.lastPrice
 	}
 	if price <= 0 {
-		return nil, ErrPriceNotSet
+		return 0, ErrPriceNotSet
 	}
 	if fraction <= 0 || fraction > 1 {
-		return nil, ErrInvalidFraction
+		return 0, ErrInvalidFraction
 	}
+	e.nextLimitID++
+	id := e.nextLimitID
 	e.pending = append(e.pending, pendingOrder{
+		id:           id,
 		kind:         pendingOpenShort,
 		price:        price,
 		fraction:     fraction,
@@ -256,7 +277,7 @@ func (e *Exchange) OpenShortLimit(price float64, fraction float64) (*Order, erro
 		lastReason:   "await_next_candle",
 		placedBar:    e.lastBar,
 	})
-	return nil, nil
+	return id, nil
 }
 
 func (e *Exchange) CloseDeal(reason string) (*Order, error) {
@@ -277,16 +298,24 @@ func (e *Exchange) CloseDeal(reason string) (*Order, error) {
 // CloseDealLimit closes the current position using a caller-specified execution price (e.g. stop/limit level).
 // This does not change the exchange's lastPrice for subsequent entries (it is treated like a synthetic execution level).
 func (e *Exchange) CloseDealLimit(price float64, reason string, stopKind string) (*Order, error) {
+	_, err := e.CloseLimit(price, reason, stopKind)
+	return nil, err
+}
+
+func (e *Exchange) CloseLimit(price float64, reason string, stopKind string) (int64, error) {
 	if price <= 0 {
 		price = e.lastPrice
 	}
 	if price <= 0 {
-		return nil, ErrPriceNotSet
+		return 0, ErrPriceNotSet
 	}
 	if reason == "" {
 		reason = ReasonExit
 	}
+	e.nextLimitID++
+	id := e.nextLimitID
 	e.pending = append(e.pending, pendingOrder{
+		id:           id,
 		kind:         pendingClose,
 		price:        price,
 		reason:       reason,
@@ -295,7 +324,7 @@ func (e *Exchange) CloseDealLimit(price float64, reason string, stopKind string)
 		lastReason:   "await_next_candle",
 		placedBar:    e.lastBar,
 	})
-	return nil, nil
+	return id, nil
 }
 
 func (e *Exchange) LimitDiagnostics() LimitDiagnostics {
@@ -440,6 +469,9 @@ func (e *Exchange) processPending(bar OHLCBar) *Order {
 			executed = &order
 		}
 		e.pending = e.pending[1:]
+		if executed != nil {
+			e.executedByID[p.id] = *executed
+		}
 		if firstExecuted == nil && executed != nil {
 			firstExecuted = executed
 		}

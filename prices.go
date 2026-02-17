@@ -11,8 +11,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"TestTrading/conf"
 )
 
 const (
@@ -97,10 +95,10 @@ func PointsPerDayForInterval(interval string) int {
 	}
 }
 
-func LoadSeriesFromConfig(configPath string, coin string, interval string) ([]float64, float64, error) {
-	root, err := conf.LoadDataRoot(configPath)
-	if err != nil {
-		return nil, 0, err
+func LoadSeriesFromDataRoot(dataRoot string, coin string, interval string) ([]float64, float64, error) {
+	root := strings.TrimSpace(dataRoot)
+	if root == "" {
+		return nil, 0, fmt.Errorf("data root is empty")
 	}
 	coin = strings.ToLower(strings.TrimSpace(coin))
 	if coin == "" {
@@ -129,10 +127,10 @@ func LoadSeriesFromConfig(configPath string, coin string, interval string) ([]fl
 	return loadSeriesFromFiles(dir, files, nil)
 }
 
-func LoadSeriesFromConfigMonths(configPath string, coin string, interval string, months []int) ([]float64, float64, error) {
-	root, err := conf.LoadDataRoot(configPath)
-	if err != nil {
-		return nil, 0, err
+func LoadSeriesFromDataRootMonths(dataRoot string, coin string, interval string, months []int) ([]float64, float64, error) {
+	root := strings.TrimSpace(dataRoot)
+	if root == "" {
+		return nil, 0, fmt.Errorf("data root is empty")
 	}
 	coin = strings.ToLower(strings.TrimSpace(coin))
 	if coin == "" {
@@ -161,10 +159,10 @@ func LoadSeriesFromConfigMonths(configPath string, coin string, interval string,
 	return loadSeriesFromFiles(dir, files, buildMonthFilter(months))
 }
 
-func LoadSeriesFromConfigYears(configPath string, coin string, interval string, years []int) ([]float64, float64, error) {
-	root, err := conf.LoadDataRoot(configPath)
-	if err != nil {
-		return nil, 0, err
+func LoadSeriesFromDataRootYears(dataRoot string, coin string, interval string, years []int) ([]float64, float64, error) {
+	root := strings.TrimSpace(dataRoot)
+	if root == "" {
+		return nil, 0, fmt.Errorf("data root is empty")
 	}
 	coin = strings.ToLower(strings.TrimSpace(coin))
 	if coin == "" {
@@ -193,10 +191,10 @@ func LoadSeriesFromConfigYears(configPath string, coin string, interval string, 
 	return loadSeriesFromFiles(dir, files, nil)
 }
 
-func LoadSeriesFromConfigYearsMonths(configPath string, coin string, interval string, years []int, months []int) ([]float64, float64, error) {
-	root, err := conf.LoadDataRoot(configPath)
-	if err != nil {
-		return nil, 0, err
+func LoadSeriesFromDataRootYearsMonths(dataRoot string, coin string, interval string, years []int, months []int) ([]float64, float64, error) {
+	root := strings.TrimSpace(dataRoot)
+	if root == "" {
+		return nil, 0, fmt.Errorf("data root is empty")
 	}
 	coin = strings.ToLower(strings.TrimSpace(coin))
 	if coin == "" {
@@ -225,10 +223,10 @@ func LoadSeriesFromConfigYearsMonths(configPath string, coin string, interval st
 	return loadSeriesFromFiles(dir, files, buildMonthFilter(months))
 }
 
-func LoadSeriesWithCloseFromConfig(configPath string, coin string, interval string) ([]float64, []float64, float64, error) {
-	root, err := conf.LoadDataRoot(configPath)
-	if err != nil {
-		return nil, nil, 0, err
+func LoadSeriesWithCloseFromDataRoot(dataRoot string, coin string, interval string) ([]float64, []float64, float64, error) {
+	root := strings.TrimSpace(dataRoot)
+	if root == "" {
+		return nil, nil, 0, fmt.Errorf("data root is empty")
 	}
 	coin = strings.ToLower(strings.TrimSpace(coin))
 	if coin == "" {
@@ -257,10 +255,10 @@ func LoadSeriesWithCloseFromConfig(configPath string, coin string, interval stri
 	return loadSeriesFromFilesWithClose(dir, files, nil)
 }
 
-func LoadSeriesWithCloseFromConfigMonths(configPath string, coin string, interval string, months []int) ([]float64, []float64, float64, error) {
-	root, err := conf.LoadDataRoot(configPath)
-	if err != nil {
-		return nil, nil, 0, err
+func LoadSeriesWithCloseFromDataRootMonths(dataRoot string, coin string, interval string, months []int) ([]float64, []float64, float64, error) {
+	root := strings.TrimSpace(dataRoot)
+	if root == "" {
+		return nil, nil, 0, fmt.Errorf("data root is empty")
 	}
 	coin = strings.ToLower(strings.TrimSpace(coin))
 	if coin == "" {
@@ -289,10 +287,10 @@ func LoadSeriesWithCloseFromConfigMonths(configPath string, coin string, interva
 	return loadSeriesFromFilesWithClose(dir, files, buildMonthFilter(months))
 }
 
-func LoadSeriesWithCloseFromConfigYears(configPath string, coin string, interval string, years []int) ([]float64, []float64, float64, error) {
-	root, err := conf.LoadDataRoot(configPath)
-	if err != nil {
-		return nil, nil, 0, err
+func LoadSeriesWithCloseFromDataRootYears(dataRoot string, coin string, interval string, years []int) ([]float64, []float64, float64, error) {
+	root := strings.TrimSpace(dataRoot)
+	if root == "" {
+		return nil, nil, 0, fmt.Errorf("data root is empty")
 	}
 	coin = strings.ToLower(strings.TrimSpace(coin))
 	if coin == "" {
@@ -321,10 +319,10 @@ func LoadSeriesWithCloseFromConfigYears(configPath string, coin string, interval
 	return loadSeriesFromFilesWithClose(dir, files, nil)
 }
 
-func LoadSeriesWithCloseFromConfigYearsMonths(configPath string, coin string, interval string, years []int, months []int) ([]float64, []float64, float64, error) {
-	root, err := conf.LoadDataRoot(configPath)
-	if err != nil {
-		return nil, nil, 0, err
+func LoadSeriesWithCloseFromDataRootYearsMonths(dataRoot string, coin string, interval string, years []int, months []int) ([]float64, []float64, float64, error) {
+	root := strings.TrimSpace(dataRoot)
+	if root == "" {
+		return nil, nil, 0, fmt.Errorf("data root is empty")
 	}
 	coin = strings.ToLower(strings.TrimSpace(coin))
 	if coin == "" {
@@ -353,10 +351,10 @@ func LoadSeriesWithCloseFromConfigYearsMonths(configPath string, coin string, in
 	return loadSeriesFromFilesWithClose(dir, files, buildMonthFilter(months))
 }
 
-func LoadSeriesWithOHLCFromConfig(configPath string, coin string, interval string) ([]float64, OHLCSeries, float64, error) {
-	root, err := conf.LoadDataRoot(configPath)
-	if err != nil {
-		return nil, OHLCSeries{}, 0, err
+func LoadSeriesWithOHLCFromDataRoot(dataRoot string, coin string, interval string) ([]float64, OHLCSeries, float64, error) {
+	root := strings.TrimSpace(dataRoot)
+	if root == "" {
+		return nil, OHLCSeries{}, 0, fmt.Errorf("data root is empty")
 	}
 	coin = strings.ToLower(strings.TrimSpace(coin))
 	if coin == "" {
@@ -385,10 +383,10 @@ func LoadSeriesWithOHLCFromConfig(configPath string, coin string, interval strin
 	return loadSeriesFromFilesWithOHLC(dir, files, nil)
 }
 
-func LoadSeriesWithOHLCFromConfigMonths(configPath string, coin string, interval string, months []int) ([]float64, OHLCSeries, float64, error) {
-	root, err := conf.LoadDataRoot(configPath)
-	if err != nil {
-		return nil, OHLCSeries{}, 0, err
+func LoadSeriesWithOHLCFromDataRootMonths(dataRoot string, coin string, interval string, months []int) ([]float64, OHLCSeries, float64, error) {
+	root := strings.TrimSpace(dataRoot)
+	if root == "" {
+		return nil, OHLCSeries{}, 0, fmt.Errorf("data root is empty")
 	}
 	coin = strings.ToLower(strings.TrimSpace(coin))
 	if coin == "" {
@@ -417,10 +415,10 @@ func LoadSeriesWithOHLCFromConfigMonths(configPath string, coin string, interval
 	return loadSeriesFromFilesWithOHLC(dir, files, buildMonthFilter(months))
 }
 
-func LoadSeriesWithOHLCFromConfigYears(configPath string, coin string, interval string, years []int) ([]float64, OHLCSeries, float64, error) {
-	root, err := conf.LoadDataRoot(configPath)
-	if err != nil {
-		return nil, OHLCSeries{}, 0, err
+func LoadSeriesWithOHLCFromDataRootYears(dataRoot string, coin string, interval string, years []int) ([]float64, OHLCSeries, float64, error) {
+	root := strings.TrimSpace(dataRoot)
+	if root == "" {
+		return nil, OHLCSeries{}, 0, fmt.Errorf("data root is empty")
 	}
 	coin = strings.ToLower(strings.TrimSpace(coin))
 	if coin == "" {
@@ -449,10 +447,10 @@ func LoadSeriesWithOHLCFromConfigYears(configPath string, coin string, interval 
 	return loadSeriesFromFilesWithOHLC(dir, files, nil)
 }
 
-func LoadSeriesWithOHLCFromConfigYearsMonths(configPath string, coin string, interval string, years []int, months []int) ([]float64, OHLCSeries, float64, error) {
-	root, err := conf.LoadDataRoot(configPath)
-	if err != nil {
-		return nil, OHLCSeries{}, 0, err
+func LoadSeriesWithOHLCFromDataRootYearsMonths(dataRoot string, coin string, interval string, years []int, months []int) ([]float64, OHLCSeries, float64, error) {
+	root := strings.TrimSpace(dataRoot)
+	if root == "" {
+		return nil, OHLCSeries{}, 0, fmt.Errorf("data root is empty")
 	}
 	coin = strings.ToLower(strings.TrimSpace(coin))
 	if coin == "" {
