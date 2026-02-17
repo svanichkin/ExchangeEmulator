@@ -444,11 +444,11 @@ func (e *Exchange) processPending(bar OHLCBar) *Order {
 		if e.tick <= p.placedAtTick {
 			break
 		}
+		fillPrice := p.price
 		if !priceInRange(p.price, bar.Low, bar.High) {
-			e.pending[0].lastReason = "price_not_in_hl"
-			e.limitFailed["price_not_in_hl"]++
+			fillPrice = bar.Close
 			e.misses = append(e.misses, LimitMiss{
-				Reason:     "price_not_in_hl",
+				Reason:     "price_not_in_hl_filled_at_close",
 				Kind:       pendingKindName(p.kind),
 				LimitPrice: p.price,
 				PlacedTick: p.placedAtTick,
@@ -456,7 +456,6 @@ func (e *Exchange) processPending(bar OHLCBar) *Order {
 				PrevBar:    p.placedBar,
 				CurrBar:    bar,
 			})
-			break
 		}
 		var executed *Order
 		switch p.kind {
@@ -466,21 +465,21 @@ func (e *Exchange) processPending(bar OHLCBar) *Order {
 				e.pending = e.pending[1:]
 				continue
 			}
-			executed, _ = e.openLongAtPrice(p.price, p.fraction, p.placedAtTick)
+			executed, _ = e.openLongAtPrice(fillPrice, p.fraction, p.placedAtTick)
 		case pendingOpenShort:
 			if e.position != 0 {
 				e.limitFailed["position_state_mismatch"]++
 				e.pending = e.pending[1:]
 				continue
 			}
-			executed, _ = e.openShortAtPrice(p.price, p.fraction, p.placedAtTick)
+			executed, _ = e.openShortAtPrice(fillPrice, p.fraction, p.placedAtTick)
 		case pendingClose:
 			if e.position == 0 {
 				e.limitFailed["position_state_mismatch"]++
 				e.pending = e.pending[1:]
 				continue
 			}
-			order := e.closeAtPrice(p.price, p.reason, p.stopKind)
+			order := e.closeAtPrice(fillPrice, p.reason, p.stopKind)
 			order.PlacedTick = p.placedAtTick
 			executed = &order
 		}
