@@ -1,30 +1,28 @@
 # ExchangeEmulator
 
-Лёгкий Go-пакет для эмуляции торгового исполнения (long/short, лимитные заявки, учёт комиссий, slippage/spread) и загрузки исторических рядов из CSV.
+A lightweight Go package that emulates trade execution (long/short, limit orders, fees, slippage/spread) and loads historical price series from CSV files.
 
-## Возможности
+## Features
 
-- эмуляция исполнения по OHLC-барам;
-- открытие/закрытие long и short позиций;
-- лимитные заявки и диагностика их пропусков;
-- расчёт баланса, equity и истории ордеров;
-- загрузка ценовых рядов (`d`, `h`, `m`) из файловой структуры.
+- execution against OHLC bars;
+- open/close long and short positions;
+- limit orders plus diagnostics for missed executions;
+- balance, equity, and order history tracking;
+- loading price series (`d`, `h`, `m`) from a folder structure.
 
-## Требования
+## Requirements
 
-- Go `1.25+`
+- Go `1.25+` (set in `go.mod`)
 
-## Установка
+## Installation
 
 ```bash
-go get github.com/alien/ExchangeEmulator
+go get github.com/svanichkin/ExchangeEmulator
 ```
 
-## Структура данных
+## Expected data layout
 
-Ожидаемая структура директории с историческими данными:
-
-```text
+```
 <data_root>/
   btc/
     d/
@@ -36,19 +34,19 @@ go get github.com/alien/ExchangeEmulator
       ...
 ```
 
-## Инициализация пути к данным
+## Initializing the data path
 
-Функции загрузки принимают прямой путь к корневой папке с данными (`dataRoot`).
-Дальше внутри ожидается структура `<dataRoot>/<coin>/<interval>/*.csv`.
+Loader functions accept the absolute path to your data root (`dataRoot`).
+Inside it, the library expects `<dataRoot>/<coin>/<interval>/*.csv`.
 
-## Быстрая проверка
+## Quick check
 
 ```bash
 go test ./...
 ```
 
-## Публикация на GitHub
+## Notes for publishing on GitHub
 
-- модуль настроен как `github.com/alien/ExchangeEmulator`;
-- зависимости очищены до реально используемых;
-- добавлены правила `.gitignore` для локальных Go-кэшей.
+- module path is `github.com/svanichkin/ExchangeEmulator`;
+- dependencies are trimmed to those actually used;
+- `.gitignore` includes local Go caches.

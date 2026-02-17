@@ -178,18 +178,8 @@ func (e *Exchange) Orders() []Order {
 	return out
 }
 
-func (e *Exchange) Tick(symbol string, price float64) (*Order, error) {
-	e.tick++
-	return e.TickBarAt(symbol, e.tick, OHLCBar{
-		Open:  price,
-		High:  price,
-		Low:   price,
-		Close: price,
-	})
-}
-
-// TickBarAt updates the exchange using a full market bar at a caller-provided tick index.
-func (e *Exchange) TickBarAt(symbol string, tick int64, bar OHLCBar) (*Order, error) {
+// tick is internal; external callers advance bars via Emulator.Next().
+func (e *Exchange) tickBarAt(symbol string, tick int64, bar OHLCBar) (*Order, error) {
 	if symbol != e.symbol {
 		return nil, ErrSymbolMismatch
 	}
@@ -552,8 +542,8 @@ func (e *Exchange) closeAtPrice(price float64, reason string, stopKind string) O
 			e.shortMargin = 0
 			e.position = 0
 			e.entryPrice = 0
-			eqAfter := e.Balance().Equity
-			execPnL = eqAfter - equityBefore + feeUSD
+			// Полное обнуление: PnL равен утраченной equity (без попытки компенсировать комиссию)
+			execPnL = -equityBefore
 			order := e.recordOrder(SideBuy, qty, mid, execPrice, feeUSD, execPnL, equityBefore, ReasonLiquidate, "", e.tick)
 			e.lastPrice = savedLast
 			return order

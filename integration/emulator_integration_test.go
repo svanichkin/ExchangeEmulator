@@ -1,7 +1,7 @@
 package emul_test
 
 import (
-	emul "github.com/alien/ExchangeEmulator"
+	emul "github.com/svanichkin/ExchangeEmulator"
 	"testing"
 )
 

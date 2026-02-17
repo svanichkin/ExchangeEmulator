@@ -61,7 +61,7 @@ func (e *Emulator) Next() (OHLCBar, []Order, error) {
 	}
 	bar := e.bars[e.index]
 	before := e.ex.Orders()
-	_, err := e.ex.TickBarAt(e.symbol, int64(e.index+1), bar)
+	_, err := e.ex.tickBarAt(e.symbol, int64(e.index+1), bar)
 	if err != nil {
 		return OHLCBar{}, nil, err
 	}

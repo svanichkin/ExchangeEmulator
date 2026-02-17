@@ -1,3 +1,3 @@
-module github.com/alien/ExchangeEmulator
+module github.com/svanichkin/ExchangeEmulator
 
 go 1.25
