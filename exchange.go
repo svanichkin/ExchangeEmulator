@@ -55,6 +55,17 @@ type Balance struct {
 	LastPrice   float64
 }
 
+type PositionInfo struct {
+	Side       OrderSide
+	Qty        float64
+	EntryPrice float64
+}
+
+type WalletSnapshot struct {
+	Balance   Balance
+	Positions []PositionInfo
+}
+
 type Exchange struct {
 	symbol       string
 	fee          float64
@@ -176,6 +187,27 @@ func (e *Exchange) Orders() []Order {
 	out := make([]Order, len(e.orders))
 	copy(out, e.orders)
 	return out
+}
+
+// Wallet returns current balance plus an explicit list of open positions (at most one in this model).
+func (e *Exchange) Wallet() WalletSnapshot {
+	bal := e.Balance()
+	positions := make([]PositionInfo, 0, 1)
+	if e.position != 0 {
+		side := SideBuy
+		if e.position < 0 {
+			side = SideSell
+		}
+		positions = append(positions, PositionInfo{
+			Side:       side,
+			Qty:        math.Abs(e.position),
+			EntryPrice: e.entryPrice,
+		})
+	}
+	return WalletSnapshot{
+		Balance:   bal,
+		Positions: positions,
+	}
 }
 
 // tick is internal; external callers advance bars via Emulator.Next().

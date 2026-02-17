@@ -17,6 +17,15 @@ type Emulator struct {
 	ex     *Exchange
 }
 
+type EmulatorConfig struct {
+	Symbol      string
+	StartUSD    float64
+	Fee         float64
+	SlippagePct float64
+	SpreadPct   float64
+	CSVPath     string
+}
+
 func NewEmulator(symbol string, startUSD float64, fee float64, slippagePct float64, spreadPct float64, bars []OHLCBar) (*Emulator, error) {
 	symbol = strings.TrimSpace(symbol)
 	if symbol == "" {
@@ -38,6 +47,18 @@ func NewEmulatorFromCSV(symbol string, startUSD float64, fee float64, slippagePc
 		return nil, err
 	}
 	return NewEmulator(symbol, startUSD, fee, slippagePct, spreadPct, bars)
+}
+
+// NewEmulatorFromConfig groups path and fee together to reduce call-site mistakes.
+func NewEmulatorFromConfig(cfg EmulatorConfig) (*Emulator, error) {
+	return NewEmulatorFromCSV(
+		cfg.Symbol,
+		cfg.StartUSD,
+		cfg.Fee,
+		cfg.SlippagePct,
+		cfg.SpreadPct,
+		cfg.CSVPath,
+	)
 }
 
 func LoadBarsFromCSV(csvPath string) ([]OHLCBar, error) {
